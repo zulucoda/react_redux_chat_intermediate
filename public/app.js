@@ -5,20 +5,47 @@ function reducer(state, action) {
       timestamp: Date.now(),
       id: uuid.v4()
     };
+    const threadIndex = state.threads.findIndex(
+      (t) => t.id === action.threadId
+    );
+    const oldThread = state.threads[threadIndex];
+    const newThread = {
+      ...oldThread,
+      messages: oldThread.messages.concat(newMessage)
+    };
     return {
-      messages: state.messages.concat(newMessage),
+      ...state,
+      threads: [
+        ...state.threads.slice(0, threadIndex),
+        newThread,
+        ...state.threads.slice(
+          threadIndex + 1, state.threads.length
+        )
+      ]
     };
   } else if (action.type === 'DELETE_MESSAGE') {
-    const index = state.messages.findIndex(
-      (m) => m.id === action.id
+    const threadIndex = state.threads.findIndex(
+      (t) => t.messages.find((m) => (
+        m.id === action.id
+      ))
     );
+    const oldThread = state.threads[threadIndex];
+    const messageIndex = oldThread.messages.findIndex((m) => m.id === action.id);
+    const messages = [
+      ...oldThread.messages.slice(0, messageIndex),
+      ...oldThread.messages.slice(messageIndex + 1, oldThread.messages.length)
+    ];
+    const newThread = {
+      ...oldThread,
+      messages: messages
+    };
     return {
-      messages: [
-        ...state.messages.slice(0, index),
-        ...state.messages.slice(
-          action.index + 1, state.messages.length
-        ),
-      ],
+      ...state,
+      threads: [
+        ...state.threads.slice(0, threadIndex),
+        newThread,
+        ...state.threads.slice(threadIndex + 1, state.threads.length)
+      ]
     };
   } else {
     return state;
@@ -99,6 +126,7 @@ const MessageInput = React.createClass({
     store.dispatch({
       type: 'ADD_MESSAGE',
       text: this.refs.messageInput.value,
+      threadId: this.props.threadId
     });
     this.refs.messageInput.value = '';
   },
@@ -147,7 +175,7 @@ const Thread = React.createClass({
         <div className='ui comments'>
           {messages}
         </div>
-        <MessageInput></MessageInput>
+        <MessageInput threadId={this.props.thread.id}></MessageInput>
       </div>
     );
   },
