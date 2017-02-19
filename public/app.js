@@ -47,7 +47,12 @@ function reducer(state, action) {
         ...state.threads.slice(threadIndex + 1, state.threads.length)
       ]
     };
-  } else {
+  } else if(action.type === 'OPEN_THREAD') {
+    return {
+      ...state,
+      activeThreadId: action.id
+    };
+  }else {
     return state;
   }
 }
@@ -93,7 +98,8 @@ const App = React.createClass({
     const activeThread = threads.find((t) => t.id === activeThreadId);
     const tabs = threads.map(t => ({
       title: t.title,
-      active: t.id === activeThreadId
+      active: t.id === activeThreadId,
+      id: t.id
     }));
     return (
       <div className='ui segment'>
@@ -105,11 +111,18 @@ const App = React.createClass({
 });
 
 const ThreadTabs = React.createClass({
+  handleClick(id){
+    store.dispatch({
+      type: 'OPEN_THREAD',
+      id: id
+    })
+  },
   render(){
     const tabs = this.props.tabs.map((tab, index) => (
       <div
         key={index}
-        className={tab.active ? 'active item' : 'item'}>
+        className={tab.active ? 'active item' : 'item'}
+        onClick={()=>this.handleClick(tab.id)}>
         {tab.title}
       </div>
     ));
