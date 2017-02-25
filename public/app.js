@@ -62,7 +62,7 @@ function messageReducer (state, action) {
         timestamp: Date.now(),
         id: uuid.v4()
       };
-      return state.contact(newMessage);
+      return state.concat(newMessage);
     }
 
     case 'DELETE_MESSAGE': {
