@@ -96,34 +96,6 @@ function messageReducer (state = [], action) {
   }
 }
 
-const initialState = {
-  activeThreadId: '1-fca2',
-  threads: [
-    {
-      id: '1-fca2',
-      title: 'Shaka Zulu',
-      messages: [
-        {
-          text: 'The English have surrendered.',
-          timestamp: Date.now(),
-          id: uuid.v4()
-        }
-      ]
-    },
-    {
-      id: '2-be91',
-      title: '50 Cent',
-      messages: [
-        {
-          text: 'Get Rich or Die Trying is a classic.',
-          timestamp: Date.now(),
-          id: uuid.v4()
-        }
-      ]
-    },
-  ]
-};
-
 const store = Redux.createStore(reducer);
 
 const App = React.createClass({
@@ -149,26 +121,41 @@ const App = React.createClass({
   },
 });
 
-const ThreadTabs = React.createClass({
-  handleClick(id){
-    store.dispatch({
-      type: 'OPEN_THREAD',
-      id: id
-    })
-  },
-  render(){
-    const tabs = this.props.tabs.map((tab, index) => (
-      <div
-        key={index}
-        className={tab.active ? 'active item' : 'item'}
-        onClick={()=>this.handleClick(tab.id)}>
+const Tabs = (props) => (
+  <div className="ui top attached tabular menu">
+    { props.tabs.map((tab, index) =>(
+      <div key={index}
+       className={tab.active ? 'active item' : 'item'}
+       onClick={()=>props.onClick(tab.id)}>
         {tab.title}
       </div>
+      ))
+    }
+  </div>
+);
+
+const ThreadTabs = React.createClass({
+  componentDidMount: function () {
+    store.subscribe(() => this.forceUpdate());
+  },
+  render(){
+    const state = store.getState();
+    const tabs = state.threads.map(t => (
+      {
+        title: t.title,
+        active: t.id === state.activeThreadId,
+        id: t.id
+      }
     ));
     return (
-      <div className="ui top attached tabular menu">
-        {tabs}
-      </div>
+      <Tabs
+      tabs={tabs}
+      onClick={(id) => (
+        store.dispatch({
+          type: 'OPEN_THREAD',
+          id: id
+        })
+      )}/>
     );
   }
 });
