@@ -1,11 +1,11 @@
-function reducer (state, action) {
+function reducer (state={}, action) {
   return {
     activeThreadId: activeThreadIdReducer(state.activeThreadId, action),
     threads: threadsReducer(state.threads, action)
   };
 }
 
-function activeThreadIdReducer (state, action) {
+function activeThreadIdReducer (state = '1-fca2', action) {
   if(action.type === 'OPEN_THREAD'){
     return action.id;
   } else {
@@ -28,7 +28,18 @@ function findThreadIndex (threads, action) {
   }
 }
 
-function threadsReducer(state, action) {
+function threadsReducer(state = [
+  {
+    id: '1-fca2',
+    title: 'Shaka Zulu',
+    messages: messageReducer(undefined, {})
+  },
+  {
+    id: '2-be91',
+    title: '50 Cent',
+    messages: messageReducer(undefined, {})
+  },
+], action) {
   switch (action.type) {
     case 'ADD_MESSAGE':
     case 'DELETE_MESSAGE':
@@ -54,7 +65,7 @@ function threadsReducer(state, action) {
   }
 }
 
-function messageReducer (state, action) {
+function messageReducer (state = [], action) {
   switch (action.type) {
     case 'ADD_MESSAGE': {
       const newMessage = {
@@ -115,7 +126,7 @@ const initialState = {
   ]
 };
 
-const store = Redux.createStore(reducer, initialState);
+const store = Redux.createStore(reducer);
 
 const App = React.createClass({
   componentDidMount: function () {
